@@ -18,7 +18,7 @@
 
 # metadata
 " Ninja Web Util "
-__version__ = ' 0.1 '
+__version__ = ' 0.2 '
 __license__ = ' GPL '
 __author__ = ' juancarlospaco '
 __email__ = ' juancarlospaco@ubuntu.com '
@@ -33,7 +33,10 @@ __full_licence__ = ''
 # imports
 from os import path
 from sip import setapi
-from twisted.python import log
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib import urlopen  # lint:ok
 
 
 from PyQt4.QtGui import (QLabel, QCompleter, QDirModel, QPushButton, QWidget,
@@ -104,7 +107,6 @@ class Main(plugin.Plugin):
         super(Main, self).initialize(*args, **kwargs)
 
         self.editor_s = self.locator.get_service('editor')
-
         # directory auto completer
         self.completer = QCompleter(self)
         self.dirs = QDirModel(self)
@@ -118,7 +120,6 @@ class Main(plugin.Plugin):
         self.source = QComboBox()
         self.source.addItems(['Clipboard', 'Local File', 'Remote URL', 'Ninja'])
         self.source.currentIndexChanged.connect(self.on_source_changed)
-
         self.infile = QLineEdit(path.expanduser("~"))
         self.infile.setPlaceholderText(' /full/path/to/file.html ')
         self.infile.setCompleter(self.completer)
@@ -151,15 +152,9 @@ class Main(plugin.Plugin):
         self.ckcss10 = QCheckBox('Condense multiple adjacent Whitespace chars')
         self.ckcss11 = QCheckBox('Condense multiple adjacent semicolon chars')
         self.ckcss12 = QCheckBox('Wrap the lines of the to 80 character length')
-
         self.ckcss13 = QCheckBox('Condense Font Weight values')
         self.ckcss14 = QCheckBox('Condense the 17 Standard Named Colors values')
-        self.ckcss14.setToolTip('''The 17 HTML Standard Named Colors are:
-            aqua, black, blue, fuchsia, gray, green, lime, maroon, navy,
-             olive, orange, purple, red, silver, teal, white, and yellow.''')
         self.ckcss15 = QCheckBox('Condense the 124 Extra Named Colors values')
-        self.ckcss15.setToolTip('<b>The 124 HTML Non-Standard Named Colors:</b>'
-            + ', '.join((EXTENDED_NAMED_COLORS)))
         self.ckcss16 = QCheckBox('Condense all Percentages values when posible')
         self.ckcss17 = QCheckBox('Condense all Pixels values when posible')
         vboxg1 = QVBoxLayout(self.group1)
@@ -168,6 +163,7 @@ class Main(plugin.Plugin):
             self.ckcss10, self.ckcss11, self.ckcss12, self.ckcss13,
             self.ckcss14, self.ckcss15, self.ckcss16, self.ckcss17, ):
             vboxg1.addWidget(each_widget)
+            each_widget.setToolTip(each_widget.text())
 
         self.group2 = QGroupBox()
         self.group2.setTitle(' HTML5 ')
@@ -175,7 +171,6 @@ class Main(plugin.Plugin):
         self.ckhtml1 = QCheckBox('Condense DOCTYPE to new HTML5 Tags')
         self.ckhtml2 = QCheckBox('Condense Href and Src to protocol agnostic')
         self.ckhtml4 = QCheckBox('Remove unnecessary Tags but keep HTML valid')
-        self.ckhtml4.setToolTip('Remove unnecesary tags while keeps HTML valid')
         self.help1 = QLabel('''<a href=
             "https://developers.google.com/speed/articles/optimizing-html">
             <small><center>Help about Unneeded Unnecessary HTML tags ?</a>''')
@@ -185,6 +180,7 @@ class Main(plugin.Plugin):
         for each_widget in (self.ckhtml0, self.ckhtml1, self.ckhtml2,
             self.ckhtml4, self.help1, ):
             vboxg2.addWidget(each_widget)
+            each_widget.setToolTip(each_widget.text())
 
         self.group3 = QGroupBox()
         self.group3.setTitle(' Javascript ')
@@ -193,17 +189,16 @@ class Main(plugin.Plugin):
         vboxg2 = QVBoxLayout(self.group3)
         for each_widget in (self.ckjs0, self.ckjs1):
             vboxg2.addWidget(each_widget)
+            each_widget.setToolTip(each_widget.text())
 
         self.group4 = QGroupBox()
         self.group4.setTitle(' General ')
         self.chckbx1 = QCheckBox('Lower case ALL the text')
-        self.chckbx1.setToolTip(
-          'CSS is case Insensitive, but selectors from HTML are case Sensitive')
         self.chckbx2 = QCheckBox('Remove Spaces, Tabs, New Lines, Empty Lines')
-        self.chckbx2.setToolTip('Condense and Compress text to 1 single line')
         vboxg4 = QVBoxLayout(self.group4)
         for each_widget in (self.chckbx1, self.chckbx2):
             vboxg4.addWidget(each_widget)
+            each_widget.setToolTip(each_widget.text())
 
         [a.setChecked(True) for a in iter((self.ckcss1, self.ckcss2,
             self.ckcss3, self.ckcss4, self.ckcss5, self.ckcss6, self.ckcss7,
@@ -260,7 +255,6 @@ class Main(plugin.Plugin):
 
     def run(self):
         ' run the string replacing '
-        log.startLogging(file('_'.join(__doc__.lower().split()) + '.log', 'w'))
         if self.source.currentText() == 'Local File':
             with open(path.abspath(str(self.infile.text()).strip()), 'r') as f:
                 txt = f.read()
@@ -270,14 +264,12 @@ class Main(plugin.Plugin):
             txt = str(self.output.toPlainText()) if str(self.output.toPlainText()) is not '' else str(QApplication.clipboard().text())
         else:
             txt = self.editor_s.get_text()
-        log.msg(txt)
         self.output.clear()
         txt = txt.lower() if self.chckbx1.isChecked() is True else txt
         txt = condense_style(txt) if self.ckhtml0.isChecked() is True else txt
         txt = condense_script(txt) if self.ckhtml0.isChecked() is True else txt
         txt = condense_doctype(txt) if self.ckhtml1.isChecked() is True else txt
         txt = condense_href_src(txt) if self.ckhtml2 is True else txt
-        log.msg(txt)
         txt = clean_unneeded_tags(txt) if self.ckhtml4.isChecked() is True else txt
         txt = condense_doc_ready(txt) if self.ckjs1.isChecked() is True else txt
         txt = jsmin(txt) if self.ckjs0.isChecked() is True else txt
@@ -295,11 +287,10 @@ class Main(plugin.Plugin):
         txt = condense_semicolons(txt) if self.ckcss11.isChecked() is True else txt
         txt = condense_font_weight(txt) if self.ckcss13.isChecked() is True else txt
         txt = condense_std_named_colors(txt) if self.ckcss14.isChecked() is True else txt
-        # txt = condense_xtra_named_colors(txt) if self.ckcss14.isChecked() is True else txt
+        # txt = condense_xtra_named_colors(txt) if self.ckcss14.isChecked() is True else txt  # FIXME
         txt = condense_percentage_values(txt) if self.ckcss16.isChecked() is True else txt
         txt = condense_pixel_values(txt) if self.ckcss17.isChecked() is True else txt
         txt = " ".join(txt.strip().split()) if self.chckbx2.isChecked() is True else txt
-        log.msg(txt)
         self.output.setPlainText(txt)
         self.output.show()
         self.output.setFocus()
