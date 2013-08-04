@@ -239,6 +239,16 @@ def condense_xtra_named_colors(css):
     return css
 
 
+def remove_url_quotes(txt):
+    ' url() does not need quotes '
+    return re.sub(r'url\((["\'])([^)]*)\1\)', r'url(\2)', txt)
+
+
+def add_encoding(txt):
+    ' add @charset "UTF-8"; if missing '
+    return '@charset "utf-8";' + txt if '@charset "utf-8";' not in txt.lower() or "@charset 'utf-8';" not in txt.lower() else txt
+
+
 def cssmin(css, wrap=None):
     css = remove_comments(css)
     css = condense_whitespace(css)
