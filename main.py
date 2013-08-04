@@ -18,7 +18,7 @@
 
 # metadata
 " Ninja Web Util "
-__version__ = ' 0.2 '
+__version__ = ' 0.4 '
 __license__ = ' GPL '
 __author__ = ' juancarlospaco '
 __email__ = ' juancarlospaco@ubuntu.com '
@@ -86,7 +86,7 @@ SAMPLE_TEXT = '''
     width:       100%;
     height:      1000px;
     font-weight: normal;
-    backgroud:   fuchsia;
+    backgroud:   url("example.com/bg.gif");
     color:       #00ff00;
     line-height: 0.5;
     border:      0px solid yellow;
@@ -157,11 +157,14 @@ class Main(plugin.Plugin):
         self.ckcss15 = QCheckBox('Condense the 124 Extra Named Colors values')
         self.ckcss16 = QCheckBox('Condense all Percentages values when posible')
         self.ckcss17 = QCheckBox('Condense all Pixels values when posible')
+        self.ckcss18 = QCheckBox('Remove unnecessary Quotes on url()')
+        self.ckcss19 = QCheckBox('Add Standard Encoding declaration if missing')
         vboxg1 = QVBoxLayout(self.group1)
         for each_widget in (self.ckcss1, self.ckcss2, self.ckcss3, self.ckcss4,
             self.ckcss5, self.ckcss6, self.ckcss7, self.ckcss8, self.ckcss9,
             self.ckcss10, self.ckcss11, self.ckcss12, self.ckcss13,
-            self.ckcss14, self.ckcss15, self.ckcss16, self.ckcss17, ):
+            self.ckcss14, self.ckcss15, self.ckcss16, self.ckcss17,
+            self.ckcss18, self.ckcss19):
             vboxg1.addWidget(each_widget)
             each_widget.setToolTip(each_widget.text())
 
@@ -204,8 +207,9 @@ class Main(plugin.Plugin):
             self.ckcss3, self.ckcss4, self.ckcss5, self.ckcss6, self.ckcss7,
             self.ckcss8, self.ckcss9, self.ckcss10, self.ckcss11, self.ckcss12,
             self.ckcss13, self.ckcss14, self.ckcss15, self.ckcss16,
-            self.ckcss17, self.ckjs1, self.ckhtml0, self.ckhtml1, self.ckhtml2,
-            self.ckhtml4, self.chckbx1, self.chckbx2))]
+            self.ckcss17, self.ckcss18, self.ckcss19, self.ckjs1, self.ckhtml0,
+            self.ckhtml1, self.ckhtml2, self.ckhtml4, self.chckbx1, self.chckbx2
+        ))]
 
         self.button = QPushButton(QIcon.fromTheme("face-cool"), 'Process Text')
         self.button.setCursor(QCursor(Qt.PointingHandCursor))
@@ -290,6 +294,8 @@ class Main(plugin.Plugin):
         # txt = condense_xtra_named_colors(txt) if self.ckcss14.isChecked() is True else txt  # FIXME
         txt = condense_percentage_values(txt) if self.ckcss16.isChecked() is True else txt
         txt = condense_pixel_values(txt) if self.ckcss17.isChecked() is True else txt
+        txt = remove_url_quotes(txt) if self.ckcss18.isChecked() is True else txt
+        txt = add_encoding(txt) if self.ckcss19.isChecked() is True else txt
         txt = " ".join(txt.strip().split()) if self.chckbx2.isChecked() is True else txt
         self.output.setPlainText(txt)
         self.output.show()
