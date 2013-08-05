@@ -23,7 +23,7 @@ __license__ = ' GPL '
 __author__ = ' juancarlospaco '
 __email__ = ' juancarlospaco@ubuntu.com '
 __url__ = ''
-__date__ = ' 15/07/2013 '
+__date__ = ' 15/08/2013 '
 __prj__ = ' webutil '
 __docformat__ = 'html'
 __source__ = ''
@@ -41,8 +41,8 @@ except ImportError:
 
 from PyQt4.QtGui import (QLabel, QCompleter, QDirModel, QPushButton, QWidget,
   QFileDialog, QDockWidget, QVBoxLayout, QCursor, QLineEdit, QIcon, QGroupBox,
-  QCheckBox, QGraphicsDropShadowEffect, QColor, QApplication, QMessageBox,
-  QComboBox, QScrollArea, )
+  QCheckBox, QGraphicsDropShadowEffect, QGraphicsBlurEffect, QColor, QComboBox,
+  QApplication, QMessageBox, QScrollArea)
 
 from PyQt4.QtCore import Qt, QDir
 
@@ -86,7 +86,7 @@ SAMPLE_TEXT = '''
     width:       100%;
     height:      1000px;
     font-weight: normal;
-    backgroud:   url("example.com/bg.gif");
+    backgroud:   url("example.com/img.gif");
     color:       #00ff00;
     line-height: 0.5;
     border:      0px solid yellow;
@@ -140,6 +140,10 @@ class Main(plugin.Plugin):
 
         self.group1 = QGroupBox()
         self.group1.setTitle(' CSS3 ')
+        self.group1.setCheckable(True)
+        self.group1.setGraphicsEffect(QGraphicsBlurEffect(self))
+        self.group1.graphicsEffect().setEnabled(False)
+        self.group1.toggled.connect(self.toggle_css_group)
         self.ckcss1 = QCheckBox('Remove unnecessary Comments')
         self.ckcss2 = QCheckBox('Remove unnecessary Whitespace characters')
         self.ckcss3 = QCheckBox('Remove unnecessary Semicolons')
@@ -157,19 +161,20 @@ class Main(plugin.Plugin):
         self.ckcss15 = QCheckBox('Condense the 124 Extra Named Colors values')
         self.ckcss16 = QCheckBox('Condense all Percentages values when posible')
         self.ckcss17 = QCheckBox('Condense all Pixels values when posible')
-        self.ckcss18 = QCheckBox('Remove unnecessary Quotes on url()')
-        self.ckcss19 = QCheckBox('Add Standard Encoding declaration if missing')
         vboxg1 = QVBoxLayout(self.group1)
         for each_widget in (self.ckcss1, self.ckcss2, self.ckcss3, self.ckcss4,
             self.ckcss5, self.ckcss6, self.ckcss7, self.ckcss8, self.ckcss9,
             self.ckcss10, self.ckcss11, self.ckcss12, self.ckcss13,
-            self.ckcss14, self.ckcss15, self.ckcss16, self.ckcss17,
-            self.ckcss18, self.ckcss19):
+            self.ckcss14, self.ckcss15, self.ckcss16, self.ckcss17, ):
             vboxg1.addWidget(each_widget)
             each_widget.setToolTip(each_widget.text())
 
         self.group2 = QGroupBox()
         self.group2.setTitle(' HTML5 ')
+        self.group2.setCheckable(True)
+        self.group2.setGraphicsEffect(QGraphicsBlurEffect(self))
+        self.group2.graphicsEffect().setEnabled(False)
+        self.group2.toggled.connect(self.toggle_html_group)
         self.ckhtml0 = QCheckBox('Condense Style and Script HTML Tags')
         self.ckhtml1 = QCheckBox('Condense DOCTYPE to new HTML5 Tags')
         self.ckhtml2 = QCheckBox('Condense Href and Src to protocol agnostic')
@@ -207,9 +212,8 @@ class Main(plugin.Plugin):
             self.ckcss3, self.ckcss4, self.ckcss5, self.ckcss6, self.ckcss7,
             self.ckcss8, self.ckcss9, self.ckcss10, self.ckcss11, self.ckcss12,
             self.ckcss13, self.ckcss14, self.ckcss15, self.ckcss16,
-            self.ckcss17, self.ckcss18, self.ckcss19, self.ckjs1, self.ckhtml0,
-            self.ckhtml1, self.ckhtml2, self.ckhtml4, self.chckbx1, self.chckbx2
-        ))]
+            self.ckcss17, self.ckjs1, self.ckhtml0, self.ckhtml1, self.ckhtml2,
+            self.ckhtml4, self.chckbx1, self.chckbx2))]
 
         self.button = QPushButton(QIcon.fromTheme("face-cool"), 'Process Text')
         self.button.setCursor(QCursor(Qt.PointingHandCursor))
@@ -294,8 +298,6 @@ class Main(plugin.Plugin):
         # txt = condense_xtra_named_colors(txt) if self.ckcss14.isChecked() is True else txt  # FIXME
         txt = condense_percentage_values(txt) if self.ckcss16.isChecked() is True else txt
         txt = condense_pixel_values(txt) if self.ckcss17.isChecked() is True else txt
-        txt = remove_url_quotes(txt) if self.ckcss18.isChecked() is True else txt
-        txt = add_encoding(txt) if self.ckcss19.isChecked() is True else txt
         txt = " ".join(txt.strip().split()) if self.chckbx2.isChecked() is True else txt
         self.output.setPlainText(txt)
         self.output.show()
@@ -326,6 +328,34 @@ class Main(plugin.Plugin):
             self.infile.hide()
             self.inurl.hide()
             self.output.setText(self.editor_s.get_text())
+
+    def toggle_css_group(self):
+        ' toggle on or off the css checkboxes '
+        if self.group1.isChecked() is True:
+            [a.setChecked(True) for a in iter((self.ckcss1, self.ckcss2,
+            self.ckcss3, self.ckcss4, self.ckcss5, self.ckcss6, self.ckcss7,
+            self.ckcss8, self.ckcss9, self.ckcss10, self.ckcss11, self.ckcss12,
+            self.ckcss13, self.ckcss14, self.ckcss15, self.ckcss16,
+            self.ckcss17))]
+            self.group1.graphicsEffect().setEnabled(False)
+        else:
+            [a.setChecked(False) for a in iter((self.ckcss1, self.ckcss2,
+            self.ckcss3, self.ckcss4, self.ckcss5, self.ckcss6, self.ckcss7,
+            self.ckcss8, self.ckcss9, self.ckcss10, self.ckcss11, self.ckcss12,
+            self.ckcss13, self.ckcss14, self.ckcss15, self.ckcss16,
+            self.ckcss17))]
+            self.group1.graphicsEffect().setEnabled(True)
+
+    def toggle_html_group(self):
+        ' toggle on or off the css checkboxes '
+        if self.group2.isChecked() is True:
+            [a.setChecked(True) for a in iter((self.ckhtml0, self.ckhtml1,
+                                               self.ckhtml2, self.ckhtml4))]
+            self.group2.graphicsEffect().setEnabled(False)
+        else:
+            [a.setChecked(False) for a in iter((self.ckhtml0, self.ckhtml1,
+                                                self.ckhtml2, self.ckhtml4))]
+            self.group2.graphicsEffect().setEnabled(True)
 
 
 ###############################################################################
