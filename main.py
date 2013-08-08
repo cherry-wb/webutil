@@ -18,7 +18,7 @@
 
 # metadata
 " Ninja Web Util "
-__version__ = ' 0.4 '
+__version__ = ' 0.8 '
 __license__ = ' GPL '
 __author__ = ' juancarlospaco '
 __email__ = ' juancarlospaco@ubuntu.com '
@@ -42,7 +42,7 @@ except ImportError:
 from PyQt4.QtGui import (QLabel, QCompleter, QDirModel, QPushButton, QWidget,
   QFileDialog, QDockWidget, QVBoxLayout, QCursor, QLineEdit, QIcon, QGroupBox,
   QCheckBox, QGraphicsDropShadowEffect, QGraphicsBlurEffect, QColor, QComboBox,
-  QApplication, QMessageBox, QScrollArea)
+  QApplication, QMessageBox, QScrollArea, QProgressBar)
 
 from PyQt4.QtCore import Qt, QDir
 
@@ -79,9 +79,12 @@ This is an HTML5/CSS3/JS Optimizer Non-Obfuscating Compressor tool for Ninja.
 ''' + ''.join((__doc__, __version__, __license__, 'by', __author__, __email__))
 
 SAMPLE_TEXT = '''
-/* -----------------TEST SAMPLE, THIS COMMENT WILL BE REMOVED---------------- */
+/* -----------------------------------------------------------------------------
+####################TEST SAMPLE, THIS COMMENT WILL BE REMOVED###################
+----------------------------------------------------------------------------- */
 
-.chun.li {
+
+.chun.li  {
     color:       rgb(255, 255, 255);
     width:       100%;
     height:      1000px;
@@ -92,7 +95,10 @@ SAMPLE_TEXT = '''
     border:      0px solid yellow;
 }   ;;
 
+
 empty.selector.will.be.removed {}
+
+/*--------------------------------------------------------------------------- */
 '''
 
 
@@ -161,11 +167,14 @@ class Main(plugin.Plugin):
         self.ckcss15 = QCheckBox('Condense the 124 Extra Named Colors values')
         self.ckcss16 = QCheckBox('Condense all Percentages values when posible')
         self.ckcss17 = QCheckBox('Condense all Pixels values when posible')
+        self.ckcss18 = QCheckBox('Remove unnecessary quotes from url()')
+        self.ckcss19 = QCheckBox('Add standard Encoding Declaration if missing')
         vboxg1 = QVBoxLayout(self.group1)
         for each_widget in (self.ckcss1, self.ckcss2, self.ckcss3, self.ckcss4,
             self.ckcss5, self.ckcss6, self.ckcss7, self.ckcss8, self.ckcss9,
             self.ckcss10, self.ckcss11, self.ckcss12, self.ckcss13,
-            self.ckcss14, self.ckcss15, self.ckcss16, self.ckcss17, ):
+            self.ckcss14, self.ckcss15, self.ckcss16, self.ckcss17,
+            self.ckcss18, self.ckcss19):
             vboxg1.addWidget(each_widget)
             each_widget.setToolTip(each_widget.text())
 
@@ -203,8 +212,12 @@ class Main(plugin.Plugin):
         self.group4.setTitle(' General ')
         self.chckbx1 = QCheckBox('Lower case ALL the text')
         self.chckbx2 = QCheckBox('Remove Spaces, Tabs, New Lines, Empty Lines')
+        self.befor, self.after = QProgressBar(), QProgressBar()
+        self.befor.setFormat("%v Chars")
+        self.after.setFormat("%v Chars")
         vboxg4 = QVBoxLayout(self.group4)
-        for each_widget in (self.chckbx1, self.chckbx2):
+        for each_widget in (self.chckbx1, self.chckbx2,
+            QLabel('<b>Before:'), self.befor, QLabel('<b>After:'), self.after):
             vboxg4.addWidget(each_widget)
             each_widget.setToolTip(each_widget.text())
 
@@ -212,8 +225,9 @@ class Main(plugin.Plugin):
             self.ckcss3, self.ckcss4, self.ckcss5, self.ckcss6, self.ckcss7,
             self.ckcss8, self.ckcss9, self.ckcss10, self.ckcss11, self.ckcss12,
             self.ckcss13, self.ckcss14, self.ckcss15, self.ckcss16,
-            self.ckcss17, self.ckjs1, self.ckhtml0, self.ckhtml1, self.ckhtml2,
-            self.ckhtml4, self.chckbx1, self.chckbx2))]
+            self.ckcss17, self.ckcss18, self.ckcss19, self.ckjs1, self.ckhtml0,
+            self.ckhtml1, self.ckhtml2, self.ckhtml4, self.chckbx1,
+            self.chckbx2))]
 
         self.button = QPushButton(QIcon.fromTheme("face-cool"), 'Process Text')
         self.button.setCursor(QCursor(Qt.PointingHandCursor))
@@ -273,6 +287,9 @@ class Main(plugin.Plugin):
         else:
             txt = self.editor_s.get_text()
         self.output.clear()
+        self.befor.setMaximum(len(txt) + 10)
+        self.after.setMaximum(len(txt) + 10)
+        self.befor.setValue(len(txt))
         txt = txt.lower() if self.chckbx1.isChecked() is True else txt
         txt = condense_style(txt) if self.ckhtml0.isChecked() is True else txt
         txt = condense_script(txt) if self.ckhtml0.isChecked() is True else txt
@@ -298,7 +315,10 @@ class Main(plugin.Plugin):
         # txt = condense_xtra_named_colors(txt) if self.ckcss14.isChecked() is True else txt  # FIXME
         txt = condense_percentage_values(txt) if self.ckcss16.isChecked() is True else txt
         txt = condense_pixel_values(txt) if self.ckcss17.isChecked() is True else txt
+        txt = remove_url_quotes(txt) if self.ckcss18.isChecked() is True else txt
+        txt = add_encoding(txt) if self.ckcss19.isChecked() is True else txt
         txt = " ".join(txt.strip().split()) if self.chckbx2.isChecked() is True else txt
+        self.after.setValue(len(txt))
         self.output.setPlainText(txt)
         self.output.show()
         self.output.setFocus()
@@ -336,14 +356,14 @@ class Main(plugin.Plugin):
             self.ckcss3, self.ckcss4, self.ckcss5, self.ckcss6, self.ckcss7,
             self.ckcss8, self.ckcss9, self.ckcss10, self.ckcss11, self.ckcss12,
             self.ckcss13, self.ckcss14, self.ckcss15, self.ckcss16,
-            self.ckcss17))]
+            self.ckcss17, self.ckcss18, self.ckcss19))]
             self.group1.graphicsEffect().setEnabled(False)
         else:
             [a.setChecked(False) for a in iter((self.ckcss1, self.ckcss2,
             self.ckcss3, self.ckcss4, self.ckcss5, self.ckcss6, self.ckcss7,
             self.ckcss8, self.ckcss9, self.ckcss10, self.ckcss11, self.ckcss12,
             self.ckcss13, self.ckcss14, self.ckcss15, self.ckcss16,
-            self.ckcss17))]
+            self.ckcss17, self.ckcss18, self.ckcss19))]
             self.group1.graphicsEffect().setEnabled(True)
 
     def toggle_html_group(self):
