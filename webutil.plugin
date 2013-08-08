@@ -2,7 +2,7 @@
   "module": "webutil",
   "class": "Main",
   "authors": "Juan Carlos <JuanCarlosPaco@Ubuntu.com>",
-  "version": "0.4",
+  "version": "0.8",
   "url": "https://github.com/juancarlospaco",
   "description": " Ninja Web Util "
 }
