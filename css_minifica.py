@@ -9,62 +9,123 @@ except ImportError:
 import re
 
 
+# 'Color Name String': (R, G, B)
 EXTENDED_NAMED_COLORS = {
-    'DarkBlue': '', 'MediumBlue': '',
-    'DarkGreen': '', 'DarkCyan': '',
-    'DeepSkyBlue': '', 'SpringGreen': '',
-    'DarkTurquoise': '', 'MediumSpringGreen': '',
-    'MidnightBlue': '', 'DodgerBlue': '',
-    'LightSeaGreen': '', 'ForestGreen': '',
-    'DarkSlateGray': '', 'LimeGreen': '',
-    'MediumSeaGreen': '', 'Turquoise': '',
-    'RoyalBlue': '', 'SeaGreen': '',
-    'SteelBlue': '', 'DarkSlateBlue': '',
-    'MediumTurquoise': '', 'Indigo': '', 'DarkOliveGreen': '',
-    'CadetBlue': '', 'CornflowerBlue': '',
-    'MediumAquaMarine': '', 'DimGray': '', 'SlateBlue': '',
-    'OliveDrab': '', 'SlateGray': '',
-    'SkyBlue': '', 'LightSlateGray': '', 'MediumSlateBlue': '',
-    'LawnGreen': '', 'Chartreuse': '',
-    'Aquamarine': '', 'LightSkyBlue': '', 'BlueViolet': '',
-    'DarkRed': '', 'DarkMagenta': '',
-    'SaddleBrown': '', 'Sienna': '', 'DarkSeaGreen': '',
-    'LightGreen': '', 'MediumPurple': '',
-    'DarkViolet': '', 'PaleGreen': '', 'Ivory': '',
-    'DarkOrchid': '', 'YellowGreen': '', 'Brown': '',
-    'DarkGray': '', 'LightBlue': '', 'FireBrick': '',
-    'GreenYellow': '', 'PaleTurquoise': '', 'LightSteelBlue': '',
-    'PowderBlue': '',
-    'DarkGoldenRod': '', 'MediumOrchid': '', 'RosyBrown': '',
-    'DarkKhaki': '',
-    'MediumVioletRed': '', 'IndianRed': '', 'Chocolate': '',
-    'LightGray': '', 'Thistle': '',
-    'Orchid': '', 'GoldenRod': '', 'PaleVioletRed': '',
-    'Crimson': '', 'Gainsboro': '',
-    'BurlyWood': '', 'LightCyan': '', 'Lavender': '',
-    'Violet': '', 'DarkSalmon': '',
-    'PaleGoldenRod': '', 'LightCoral': '', 'Khaki': '',
-    'AliceBlue': '', 'HoneyDew': '', 'Azure': '',
-    'SandyBrown': '', 'Wheat': '', 'Beige': '',
-    'WhiteSmoke': '', 'MintCream': '', 'GhostWhite': '',
-    'Salmon': '', 'AntiqueWhite': '', 'LightGoldenRodYellow': '',
-    'OldLace': '',
-    'Magenta': '', 'DeepPink': '', 'OrangeRed': '',
-    'Tomato': '', 'HotPink': '', 'Coral': '',
-    'DarkOrange': '', 'LightPink': '', 'LightSalmon': '',
-    'PeachPuff': '',
-    'NavajoWhite': '', 'Moccasin': '', 'Bisque': '',
-    'MistyRose': '', 'BlanchedAlmond': '',
-    'PapayaWhip': '', 'LavenderBlush': '', 'SeaShell': '',
-    'Cornsilk': '', 'LemonChiffon': '',
-    'FloralWhite': '', 'LightYellow': ''}
+    'azure': (240, 255, 255),
+    'beige': (245, 245, 220),
+    'bisque': (255, 228, 196),
+    'blanchedalmond': (255, 235, 205),
+    'brown': (165, 42, 42),
+    'burlywood': (222, 184, 135),
+    'chartreuse': (127, 255, 0),
+    'chocolate': (210, 105, 30),
+    'coral': (255, 127, 80),
+    'cornsilk': (255, 248, 220),
+    'crimson': (220, 20, 60),
+    'cyan': (0, 255, 255),
+    'darkcyan': (0, 139, 139),
+    'darkgoldenrod': (184, 134, 11),
+    'darkgray': (169, 169, 169),
+    'darkgreen': (0, 100, 0),
+    'darkgrey': (169, 169, 169),
+    'darkkhaki': (189, 183, 107),
+    'darkmagenta': (139, 0, 139),
+    'darkolivegreen': (85, 107, 47),
+    'darkorange': (255, 140, 0),
+    'darkorchid': (153, 50, 204),
+    'darkred': (139, 0, 0),
+    'darksalmon': (233, 150, 122),
+    'darkseagreen': (143, 188, 143),
+    'darkslategray': (47, 79, 79),
+    'darkslategrey': (47, 79, 79),
+    'darkturquoise': (0, 206, 209),
+    'darkviolet': (148, 0, 211),
+    'deeppink': (255, 20, 147),
+    'dimgray': (105, 105, 105),
+    'dimgrey': (105, 105, 105),
+    'firebrick': (178, 34, 34),
+    'forestgreen': (34, 139, 34),
+    'gainsboro': (220, 220, 220),
+    'gold': (255, 215, 0),
+    'goldenrod': (218, 165, 32),
+    'gray': (128, 128, 128),
+    'green': (0, 128, 0),
+    'grey': (128, 128, 128),
+    'honeydew': (240, 255, 240),
+    'hotpink': (255, 105, 180),
+    'indianred': (205, 92, 92),
+    'indigo': (75, 0, 130),
+    'ivory': (255, 255, 240),
+    'khaki': (240, 230, 140),
+    'lavender': (230, 230, 250),
+    'lavenderblush': (255, 240, 245),
+    'lawngreen': (124, 252, 0),
+    'lemonchiffon': (255, 250, 205),
+    'lightcoral': (240, 128, 128),
+    'lightcyan': (224, 255, 255),
+    'lightgray': (211, 211, 211),
+    'lightgreen': (144, 238, 144),
+    'lightgrey': (211, 211, 211),
+    'lightpink': (255, 182, 193),
+    'lightsalmon': (255, 160, 122),
+    'lightseagreen': (32, 178, 170),
+    'lightslategray': (119, 136, 153),
+    'lightslategrey': (119, 136, 153),
+    'lime': (0, 255, 0),
+    'limegreen': (50, 205, 50),
+    'linen': (250, 240, 230),
+    'magenta': (255, 0, 255),
+    'maroon': (128, 0, 0),
+    'mediumorchid': (186, 85, 211),
+    'mediumpurple': (147, 112, 219),
+    'mediumseagreen': (60, 179, 113),
+    'mediumspringgreen': (0, 250, 154),
+    'mediumturquoise': (72, 209, 204),
+    'mediumvioletred': (199, 21, 133),
+    'mintcream': (245, 255, 250),
+    'mistyrose': (255, 228, 225),
+    'moccasin': (255, 228, 181),
+    'navy': (0, 0, 128),
+    'oldlace': (253, 245, 230),
+    'olive': (128, 128, 0),
+    'olivedrab': (107, 142, 35),
+    'orange': (255, 165, 0),
+    'orangered': (255, 69, 0),
+    'orchid': (218, 112, 214),
+    'palegoldenrod': (238, 232, 170),
+    'palegreen': (152, 251, 152),
+    'paleturquoise': (175, 238, 238),
+    'palevioletred': (219, 112, 147),
+    'papayawhip': (255, 239, 213),
+    'peachpuff': (255, 218, 185),
+    'peru': (205, 133, 63),
+    'pink': (255, 192, 203),
+    'plum': (221, 160, 221),
+    'purple': (128, 0, 128),
+    'rosybrown': (188, 143, 143),
+    'saddlebrown': (139, 69, 19),
+    'salmon': (250, 128, 114),
+    'sandybrown': (244, 164, 96),
+    'seagreen': (46, 139, 87),
+    'seashell': (255, 245, 238),
+    'sienna': (160, 82, 45),
+    'silver': (192, 192, 192),
+    'slategray': (112, 128, 144),
+    'slategrey': (112, 128, 144),
+    'snow': (255, 250, 250),
+    'springgreen': (0, 255, 127),
+    'teal': (0, 128, 128),
+    'thistle': (216, 191, 216),
+    'tomato': (255, 99, 71),
+    'turquoise': (64, 224, 208),
+    'violet': (238, 130, 238),
+    'wheat': (245, 222, 179),
+}
 
 
 def remove_comments(css):
     """Remove all CSS comment blocks."""
-    iemac = False
-    preserve = False
-    comment_start = css.find("/*")
+    iemac, preserve, comment_start = False, False, css.find("/*")
     while comment_start >= 0:
         preserve = css[comment_start + 2:comment_start + 3] == "!"
         comment_end = css.find("*/", comment_start + 2)
@@ -74,11 +135,9 @@ def remove_comments(css):
                 break
         elif comment_end >= (comment_start + 2):
             if css[comment_end - 1] == "\\":
-                comment_start = comment_end + 2
-                iemac = True
+                comment_start, iemac = comment_end + 2, True
             elif iemac:
-                comment_start = comment_end + 2
-                iemac = False
+                comment_start, iemac = comment_end + 2, False
             elif not preserve:
                 css = css[:comment_start] + css[comment_end + 2:]
             else:
@@ -91,14 +150,12 @@ def remove_unnecessary_whitespace(css):
     """Remove unnecessary whitespace characters."""
 
     def pseudoclasscolon(css):
-
         """
         Prevents 'p :link' from becoming 'p:link'.
 
         Translates 'p :link' into 'p ___PSEUDOCLASSCOLON___link'; this is
         translated back again later.
         """
-
         regex = re.compile(r"(^|\})(([^\{\:])+\:)+([^\{]*\{)")
         match = regex.search(css)
         while match:
@@ -144,7 +201,8 @@ def normalize_rgb_colors_to_hex(css):
     regex = re.compile(r"rgb\s*\(\s*([0-9,\s]+)\s*\)")
     match = regex.search(css)
     while match:
-        colors = map(lambda s: s.strip(), match.group(1).split(","))
+        colors = [s.strip() for s in match.group(1).split(",")]
+        #colors = map(lambda s: s.strip(), match.group(1).split(","))  # old py2
         hexcolor = '#%.2x%.2x%.2x' % tuple(map(int, colors))
         css = css.replace(match.group(), hexcolor)
         match = regex.search(css)
@@ -198,8 +256,7 @@ def condense_semicolons(css):
 
 def wrap_css_lines(css, line_length):
     """Wrap the lines of the given CSS to an approximate length."""
-    lines = []
-    line_start = 0
+    lines, line_start = [], 0
     for i, char in enumerate(css):
         if char == '}' and (i - line_start >= line_length):
             lines.append(css[line_start:i + 1])
@@ -235,7 +292,9 @@ def condense_std_named_colors(css):
 def condense_xtra_named_colors(css):
     "Condense multiple named color values to shorter replacement by using HEX "
     for k, v in iter(list(EXTENDED_NAMED_COLORS.items())):
-        css = css.replace(k, v)
+        same_color_but_rgb = 'rgb({},{},{})'.format(v[0], v[1], v[2])
+        if len(k) > len(same_color_but_rgb):
+            css = css.replace(k, same_color_but_rgb)
     return css
 
 
@@ -246,12 +305,17 @@ def remove_url_quotes(txt):
 
 def add_encoding(txt):
     ' add @charset "UTF-8"; if missing '
-    return '@charset "utf-8";' + txt if '@charset "utf-8";' not in txt.lower() or "@charset 'utf-8';" not in txt.lower() else txt
+    return '@charset "utf-8";' + txt if '@charset "utf-8"' not in txt.lower() or "@charset 'utf-8'" not in txt.lower() else txt
 
 
 def cssmin(css, wrap=None):
+    ' method to call all other methods, minify css by all possible ways '
     css = remove_comments(css)
     css = condense_whitespace(css)
+    css = remove_url_quotes(css)
+    css = condense_std_named_colors(css)
+    css = condense_xtra_named_colors(css)
+    css = condense_font_weight(css)
     css = remove_unnecessary_whitespace(css)
     css = remove_unnecessary_semicolons(css)
     css = condense_zero_units(css)
@@ -259,7 +323,7 @@ def cssmin(css, wrap=None):
     css = condense_floating_points(css)
     css = normalize_rgb_colors_to_hex(css)
     css = condense_hex_colors(css)
-    if wrap is not None:
-        css = wrap_css_lines(css, wrap)
+    css = wrap_css_lines(css, wrap) if wrap is not None else css
     css = condense_semicolons(css)
+    css = add_encoding(css)
     return css.strip()
